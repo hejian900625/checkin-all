@@ -1,0 +1,7 @@
+# 邮件凭据（含 163 授权码），绝不入库
+mail.json
+
+# 运行产物
+logs/
+last-run.json
+*.log
