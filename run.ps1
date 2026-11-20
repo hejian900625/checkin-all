@@ -111,9 +111,11 @@ function Invoke-Job($job) {
     }
     if ($null -eq $exitCode) { $exitCode = 1 }
 
-    # network flake retry: one retry after 20s if the tail looks like a transport error
+    # network flake retry: retry after 20s if the full output looks like a transport error.
+    # Match $text, not the 300-char tail: PowerShell wraps native stderr in several lines of
+    # boilerplate, so the real "getaddrinfo ..." line can be cut off from the tail.
     if ($exitCode -ne 0 -and $job.Tolerate -notcontains $exitCode) {
-        if ($tail -match 'fetch failed|ENOTFOUND|ECONNRESET|ETIMEDOUT|EAI_AGAIN|getaddrinfo') {
+        if ($text -match 'fetch failed|ENOTFOUND|ECONNRESET|ETIMEDOUT|EAI_AGAIN|getaddrinfo') {
             Log ('    network error detected, retrying in 20s')
             Start-Sleep -Seconds 20
             return Invoke-Job $job
